@@ -1,48 +1,53 @@
 let form = document.getElementById("form-container");
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
     let city = document.getElementById("city").value;
 
-    getWeatherData(city).then((response) => {
+    try {
+        // Llamada a la API para obtener los datos del clima
+        const response = await getWeatherData(city);
+
+        if (!response || response.cod !== 200) {
+            throw new Error("Ciudad no encontrada o error en la API");
+        }
+
         const { main, clouds, wind } = response;
+
+        // Mostrar la sección del clima
         const section = document.getElementById("temp-section");
         section.style.display = "flex";
 
-        const minTemp = document.getElementById("min-temp");
-        minTemp.textContent = Math.trunc(main.temp_min - 273.15);
-        const currentTemp = document.getElementById("current-temp");
-        currentTemp.textContent = Math.trunc(main.temp - 273.15);
-        const maxTemp = document.getElementById("max-temp");
-        maxTemp.textContent = Math.trunc(main.temp_max - 273.15);
+        // Actualizar los datos del DOM
+        document.getElementById("min-temp").textContent = Math.trunc(main.temp_min - 273.15);
+        document.getElementById("current-temp").textContent = Math.trunc(main.temp - 273.15);
+        document.getElementById("max-temp").textContent = Math.trunc(main.temp_max - 273.15);
+        document.getElementById("humidity").textContent = main.humidity;
+        document.getElementById("pressure").textContent = main.pressure;
+        document.getElementById("clouds").textContent = clouds.all;
+        document.getElementById("wind").textContent = wind.speed;
 
-        const humidity = document.getElementById("humidity");
-        humidity.textContent = main.humidity;
-        const pressure = document.getElementById("pressure");
-        pressure.textContent = main.pressure;
-
-        const frontClouds = document.getElementById("clouds");
-        frontClouds.textContent = clouds.all;
-        const frontWind = document.getElementById("wind");
-        frontWind.textContent = wind.speed;
-    });
+    } catch (error) {
+        // Manejo de errores
+        console.error("Error al obtener los datos del clima:", error.message);
+        alert("Ocurrió un error. Por favor, verifica la ciudad ingresada.");
+    }
 });
 
-function getWeatherData(city) {
-    return fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d336d0c58ac09f405fa5aa551a1dc544`
-    ).then((response) => response.json());
-    /*  .then((reponse) => {
-        if (!reponse.ok) {
-          throw new Error("Ciudad no encontrada");
+async function getWeatherData(city) {
+    try {
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d336d0c58ac09f405fa5aa551a1dc544`
+        );
+
+        if (!response.ok) {
+            throw new Error("Error en la respuesta de la API");
         }
-        return reponse.json();
-      })
-      .then((data) => {
-        console.log("Datos del clima", data);
-      })
-      .catch((error) => {
-        console.error("Ocurrio un error: ", error.message);
-        alert("No se pudo encontrar la ciudad. Por favor intentelo de nuevo.");
-      }); */
+
+        return await response.json();
+    } catch (error) {
+        // Captura errores relacionados con fetch
+        console.error("Error en getWeatherData:", error.message);
+        throw error; // Re-lanzar el error para que pueda ser manejado por el caller
+    }
 }
