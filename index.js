@@ -1,4 +1,4 @@
-let form = document.getElementById("form-container");
+/* let form = document.getElementById("form-container");
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -49,5 +49,53 @@ async function getWeatherData(city) {
         // Captura errores relacionados con fetch
         console.error("Error en getWeatherData:", error.message);
         throw error; // Re-lanzar el error para que pueda ser manejado por el caller
+    }
+} */
+
+
+function setupEventListeners() {
+    const form = document.getElementById("form-container");
+    form.addEventListener("submit", handleFormSubmit);
+}
+
+function updateDOMWithWeatherData(weatherData) {
+    const { main, clouds, wind } = weatherData;
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+
+    try {
+        //1. validar la entrada del usuario
+        const city = document.getElementByI("city").value;
+        if (!city.trim()) {
+            alert("Por favor, ingresa una ciudad.");
+            return;
+        }
+        //2. llamar a la API para obtener los datos del clima
+        const weatherData = await getWeatherData(city);
+
+        //3. Actualizamos los datos del DOM con los nuevos valores
+        updateDOMWithWeatherData(weatherData);
+    } catch (error) {
+        //4. Manejo de errores y mostrar un mensaje de error al usuario
+        alert("Ocurrio un error:" + error.message);
+    }
+}
+
+async function getWeatherData(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d336d0c58ac09f405fa5aa551a1dc544`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Ciudad no encontrada o error en la API");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error en getWeatherData:", error.message);
+        throw error;
     }
 }
