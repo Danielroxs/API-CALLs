@@ -58,8 +58,18 @@ function setupEventListeners() {
     form.addEventListener("submit", handleFormSubmit);
 }
 
-function updateDOMWithWeatherData(weatherData) {
-    const { main, clouds, wind } = weatherData;
+function updateDOMWithWeatherData(data) {
+    const { main, clouds, wind } = data;
+
+    document.getElementById("min-temp").textContent = Math.trunc(main.temp_min - 273.15);
+    document.getElementById("current-temp").textContent = Math.trunc(main.temp - 273.15);
+    document.getElementById("max-temp").textContent = Math.trunc(main.temp_max - 273.15);
+    document.getElementById("humidity").textContent = main.humidity;
+    document.getElementById("pressure").textContent = main.pressure;
+    document.getElementById("clouds").textContent = clouds.all;
+    document.getElementById("wind").textContent = wind.speed;
+
+    document.getElementById("temp-section").style.display = "flex";
 }
 
 async function handleFormSubmit(e) {
@@ -67,7 +77,7 @@ async function handleFormSubmit(e) {
 
     try {
         //1. validar la entrada del usuario
-        const city = document.getElementByI("city").value;
+        const city = document.getElementById("city").value;
         if (!city.trim()) {
             alert("Por favor, ingresa una ciudad.");
             return;
@@ -99,3 +109,9 @@ async function getWeatherData(city) {
         throw error;
     }
 }
+
+function initApp() {
+    setupEventListeners();
+}
+
+document.addEventListener("DOMContentLoaded", initApp)
